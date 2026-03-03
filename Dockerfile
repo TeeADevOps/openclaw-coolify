@@ -82,11 +82,12 @@ RUN --mount=type=cache,target=/data/.bun/install/cache \
 # Ensure global npm bin is in PATH
 ENV PATH="/usr/local/bin:/usr/local/lib/node_modules/.bin:${PATH}"
 
-# OpenClaw (npm install — no cache mount, avoids stale placeholder package)
-RUN if [ "$OPENCLAW_BETA" = "true" ]; then \
-    npm install -g openclaw@beta; \
+# OpenClaw (npm install — force registry fetch to avoid stale cache)
+RUN npm cache clean --force && \
+    if [ "$OPENCLAW_BETA" = "true" ]; then \
+    npm install -g --prefer-online openclaw@beta; \
     else \
-    npm install -g openclaw@latest; \
+    npm install -g --prefer-online openclaw@latest; \
     fi && \
     openclaw --version
 
