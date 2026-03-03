@@ -85,13 +85,9 @@ RUN --mount=type=cache,target=/data/.npm \
     npm install -g openclaw; \
     fi 
 
-# Install uv explicitly
-RUN curl -L https://github.com/azlux/uv/releases/latest/download/uv-linux-x64 -o /usr/local/bin/uv && \
-    chmod +x /usr/local/bin/uv
-
-# Claude + Kimi
-RUN curl -fsSL https://claude.ai/install.sh | bash && \
-    curl -L https://code.kimi.com/install.sh | bash && \
+# Install uv (Astral's Python package manager)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    ln -sf /root/.local/bin/uv /usr/local/bin/uv && \
     command -v uv
 
 # Make sure uv and other local bins are available
@@ -105,11 +101,8 @@ FROM dependencies AS final
 WORKDIR /app
 COPY . .
 
-# Symlinks
-RUN ln -sf /data/.claude/bin/claude /usr/local/bin/claude || true && \
-    ln -sf /data/.kimi/bin/kimi /usr/local/bin/kimi || true && \
-    chmod +x /app/scripts/*.sh
+RUN chmod +x /app/scripts/*.sh
 
-ENV PATH="/root/.local/bin:/usr/local/go/bin:/usr/local/bin:/usr/bin:/bin:/data/.bun/bin:/data/.bun/install/global/bin:/data/.claude/bin:/data/.kimi/bin"
+ENV PATH="/root/.local/bin:/usr/local/go/bin:/usr/local/bin:/usr/bin:/bin:/data/.bun/bin:/data/.bun/install/global/bin"
 EXPOSE 18789
 CMD ["bash", "/app/scripts/bootstrap.sh"]
